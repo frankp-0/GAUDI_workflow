@@ -33,10 +33,12 @@ workflow run_gaudi {
 
 task make_fbm {
   input {
-    String vcf_file
-    String fbm_pref
-    String geno_format
-    Int chunk_size
+      String vcf_file
+      String fbm_pref
+      String geno_format
+      Array[String] anc_names
+      Int chunk_size
+      Int min_ac
   }
   command <<<
     Rscript run_make_fbm.R \
