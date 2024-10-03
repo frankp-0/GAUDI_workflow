@@ -14,8 +14,8 @@ workflow run_gaudi {
       input:  vcf_file=vcf_file,
               fbm_pref=fbm_pref,
               geno_format=geno_format,
-              anc_names=anc_names
-              chunk_size=chunk_size
+              anc_names=anc_names,
+              chunk_size=chunk_size,
               min_ac=min_ac
     }
 
