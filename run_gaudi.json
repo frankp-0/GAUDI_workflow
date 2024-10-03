@@ -1,5 +1,5 @@
 {
-  "vcf_file": "/usr/local/lib/R/site-library/HAUDI/extdata/2way.lanc.vcf.gz",
+  "vcf_file": "test_data/2way.lanc.vcf.gz",
   "fbm_pref": "test",
   "geno_format": "GT",
   "anc_names": ["pop_1", "pop_2"],
