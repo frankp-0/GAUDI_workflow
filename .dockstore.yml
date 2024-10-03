@@ -1,0 +1,7 @@
+version: 1.0
+workflows:
+    - name: run_gaudi
+      subclass: WDL
+      primaryDescriptorPath: /run_gaudi.wdl
+      testParameterFiles:
+          - /run_gaudi.json
