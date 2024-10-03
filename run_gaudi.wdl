@@ -41,20 +41,22 @@ task make_fbm {
       Int min_ac
   }
   command <<<
-    Rscript run_make_fbm.R \
-      --vcf_file=~{vcf_file} \
-      --fbm_pref=~{fbm_pref} \
-      --geno_format=~{geno_format} \
-      --anc_names=~sep(",", ~{anc_names}) \
-      --chunk_size=~{chunk_size} \
-      --min_ac=~{min_ac}
+    Rscript /scripts/run_make_fbm.R \
+      --vcf_file ~{vcf_file} \
+      --fbm_pref ~{fbm_pref} \
+      --geno_format ~{geno_format} \
+      --anc_names ~{sep=',' anc_names} \
+      --chunk_size ~{chunk_size} \
+      --min_ac ~{min_ac}
   >>>
+
   output {
     File rds_file = "${fbm_pref}.rds"
     File bk_file = "${fbm_pref}.bk"
-    File info_file = "${fbm_pref}.info"
+    File info_file = "${fbm_pref}_info.txt"
   }
+
   runtime {
-    docker: "frankpo/run_gaudi:0.0.1"
-  }
+      docker: "frankpo/run_gaudi:0.0.1"
+    }
 }

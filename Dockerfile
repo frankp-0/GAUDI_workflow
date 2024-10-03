@@ -5,3 +5,4 @@ RUN R -e 'BiocManager::install("VariantAnnotation");\
     install.packages("optparse")'
 
 COPY R/run_make_fbm.R /scripts/run_make_fbm.R
+COPY test_data /test_data
