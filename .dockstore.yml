@@ -5,9 +5,3 @@ workflows:
       primaryDescriptorPath: /run_gaudi.wdl
       testParameterFiles:
           - /run_gaudi.json
-workflows:
-    - name: test
-      subclass: WDL
-      primaryDescriptorPath: /test.wdl
-      testParameterFiles:
-          - /test.json

@@ -4,5 +4,5 @@ RUN R -e 'BiocManager::install("VariantAnnotation");\
     devtools::install_github("https://github.com/frankp-0/HAUDI.git");\
     install.packages("optparse")'
 
-COPY R/run_make_fbm.R /scripts/run_make_fbm.R
+COPY R/* /scripts/
 COPY test_data /test_data

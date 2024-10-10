@@ -22,5 +22,10 @@ result <- HAUDI::make_fbm(
   min_ac = opt$min_ac
 )
 
-saveRDS(result$FBM, file = paste0(opt$fbm_pref, ".rds"))
+dt_bk_dims <- data.table(
+  ncol = ncol(result$FBM),
+  nrow = nrow(result$FBM)
+)
+
+fwrite(dt_bk_dims, file = paste0(opt$fbm_pref, "_dims.txt"))
 fwrite(result$info, file = paste0(opt$fbm_pref, "_info.txt"))
