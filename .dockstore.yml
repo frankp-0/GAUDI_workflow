@@ -1,3 +1,4 @@
+version: 1.2
 workflows:
     - name: run_gaudi
       subclass: WDL
