@@ -13,12 +13,15 @@ option_list <- list(
 )
 opt <- parse_args(OptionParser(option_list = option_list))
 
+## Specify coding scheme for FBM
 code_dosage <- rep(NA_real_, 256)
 code_dosage[1:201] <- seq(0, 2, length.out = 201)
 
+## Read in data
 fbm_info <- fread(opt$info_file)
 dt_bk_dims <- fread(opt$dims_file)
 
+## Create FBM
 bk_file <- strsplit(opt$bk_file, ".bk")[[1]]
 fbm_obj <- FBM.code256(
   nrow = dt_bk_dims$nrow,
@@ -28,8 +31,10 @@ fbm_obj <- FBM.code256(
   create_bk = FALSE,
 )
 
+## Create phenotype
 y <- as.numeric(readLines(opt$phenotype_file))
 
+## Fit model
 mod <- HAUDI::gaudi(
   fbm_obj = fbm_obj,
   fbm_info = fbm_info,
