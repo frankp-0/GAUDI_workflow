@@ -101,6 +101,6 @@ task fit_gaudi {
       }
 
   runtime {
-      docker: "frankpo/run_gaudi:0.0.1"
+      docker: "frankpo/run_gaudi:0.0.2"
     }
   }
