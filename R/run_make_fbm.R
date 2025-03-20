@@ -29,3 +29,7 @@ dt_bk_dims <- data.table(
 
 fwrite(dt_bk_dims, file = paste0(opt$fbm_pref, "_dims.txt"))
 fwrite(result$info, file = paste0(opt$fbm_pref, "_info.txt"))
+writeLines(
+  text = attr(x = result$FBM, which = "samples"),
+  con = paste0(opt$fbm_pref, "_samples.txt")
+)

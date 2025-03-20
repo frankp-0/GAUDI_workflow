@@ -36,6 +36,7 @@ workflow run_gaudi {
       File bk_file = make_fbm.bk_file
       File info_file = make_fbm.info_file
       File dims_file = make_fbm.dims_file
+      File fbm_samples_file = make_fbm.samples_file
       File model_file = fit_gaudi.model_file
     }
 
@@ -69,10 +70,11 @@ task make_fbm {
     File bk_file = "${fbm_pref}.bk"
     File dims_file = "${fbm_pref}_dims.txt"
     File info_file = "${fbm_pref}_info.txt"
+    File samples_file = "${fbm_pref}_samples.txt"
   }
 
   runtime {
-      docker: "frankpo/run_gaudi:0.0.1"
+      docker: "frankpo/run_gaudi:0.0.4"
     }
 }
 
