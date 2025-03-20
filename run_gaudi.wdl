@@ -11,6 +11,7 @@ workflow run_gaudi {
       Int min_ac
       Int gamma
       File phenotype_file
+      String phenotype
     }
 
     call make_fbm {
@@ -28,8 +29,10 @@ workflow run_gaudi {
              bk_file=make_fbm.bk_file,
              info_file=make_fbm.info_file,
              dims_file=make_fbm.dims_file,
+             fbm_samples_file=make_fbm.samples_file,
              gamma=gamma,
-             phenotype_file=phenotype_file
+             phenotype_file=phenotype_file,
+             phenotype=phenotype
       }
 
     output {
@@ -84,8 +87,10 @@ task fit_gaudi {
       File bk_file
       File info_file
       File dims_file
+      File fbm_samples_file
       Float gamma
       File phenotype_file
+      String phenotype
     }
 
     command <<<
@@ -93,8 +98,10 @@ task fit_gaudi {
       --bk_file ~{bk_file} \
       --info_file ~{info_file} \
       --dims_file ~{dims_file} \
+      --fbm_samples_file ~{fbm_samples_file} \
       --gamma ~{gamma} \
       --phenotype_file ~{phenotype_file} \
+      --phenotype ~{phenotype} \
       --model_file ~{fbm_pref}_model.rds
     >>>
 
@@ -103,6 +110,6 @@ task fit_gaudi {
       }
 
   runtime {
-      docker: "frankpo/run_gaudi:0.0.3"
+      docker: "frankpo/run_gaudi:0.0.4"
     }
   }

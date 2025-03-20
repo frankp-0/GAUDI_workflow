@@ -9,6 +9,9 @@ option_list <- list(
   make_option(c("--dims_file"), type = "character"),
   make_option(c("--gamma"), type = "integer"),
   make_option(c("--phenotype_file"), type = "character"),
+  make_option(c("--phenotype"), type = "character"),
+  make_option(c("--fbm_samples_file"), type = "character", default = NULL),
+  make_option(c("--training_samples_file"), type = "character", default = NULL),
   make_option(c("--model_file"), type = "character")
 )
 opt <- parse_args(OptionParser(option_list = option_list))
@@ -30,15 +33,24 @@ fbm_obj <- FBM.code256(
   backingfile = bk_file,
   create_bk = FALSE,
 )
+fbm_samples <- readLines(opt$fbm_samples_file)
 
 ## Create phenotype
-y <- as.numeric(readLines(opt$phenotype_file))
+pheno <- fread(opt$phenotype_file)
+pheno <- pheno[match(pheno[["IID"]], fbm_samples), ]
+y <- pheno[[opt$phenotype]]
+if (!is.null(opt$training_samples_file)) {
+  training_samples <- readLines(opt$training_samples_file)
+  y[!fbm_samples %in% training_samples] <- NA
+}
+ind_train <- which(!is.na(y))
 
 ## Fit model
 mod <- HAUDI::gaudi(
   fbm_obj = fbm_obj,
   fbm_info = fbm_info,
   y = y,
+  ind_train = ind_train,
   gamma_vec = opt$gamma,
   k = 5
 )
