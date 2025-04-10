@@ -12,7 +12,7 @@ option_list <- list(
   make_option(c("--phenotype"), type = "character"),
   make_option(c("--fbm_samples_file"), type = "character", default = NULL),
   make_option(c("--training_samples_file"), type = "character", default = NULL),
-  make_option(c("--model_file"), type = "character")
+  make_option(c("--output_prefix"), type = "character")
 )
 opt <- parse_args(OptionParser(option_list = option_list))
 
@@ -55,4 +55,22 @@ mod <- HAUDI::gaudi(
   k = 5
 )
 
-saveRDS(mod, file = opt$model_file)
+# get PGS
+X <- HAUDI::construct_gaudi(fbm_obj, fbm_info)
+pgs <- predict(mod$fit, Xnew = X, lambda = mod$best_lambda)$fit[, 1]
+dt_pgs <- data.table(sample = fbm_samples, score = pgs)
+
+# get effect sizes and snps (excluding intercept)
+beta <- coef(mod$fit, lambda = mod$best_lambda)$beta[-1, 1]
+snps_anc <- mod$snps[-1]
+dt_effect <- data.table(
+  snps = sapply(strsplit(snps_anc, ".anc."), function(x) x[[1]]),
+  anc = sapply(strsplit(snps_anc, ".anc."), function(x) x[[2]]),
+  beta = beta
+)
+dt_effect <- dcast(dt_effect, snps ~ anc, value.var = "beta")
+
+# write results
+saveRDS(mod, file = paste0(opt$output_prefix, "_model.rds"))
+fwrite(dt_pgs, file = paste0(opt$output_prefix, "_pgs.txt"))
+fwrite(dt_effect, file = paste0(opt$output_prefix, "_effects.txt"))

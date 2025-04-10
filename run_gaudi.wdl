@@ -15,6 +15,7 @@ workflow run_gaudi {
       Int gamma
       File phenotype_file
       String phenotype
+      String output_prefix
     }
 
     call subset_target {
@@ -44,7 +45,8 @@ workflow run_gaudi {
              fbm_samples_file=make_fbm.samples_file,
              gamma=gamma,
              phenotype_file=phenotype_file,
-             phenotype=phenotype
+             phenotype=phenotype,
+             output_prefix=output_prefix
       }
 
     output {
@@ -53,6 +55,8 @@ workflow run_gaudi {
       File dims_file = make_fbm.dims_file
       File fbm_samples_file = make_fbm.samples_file
       File model_file = fit_gaudi.model_file
+      File pgs_file = fit_gaudi.pgs_file
+      File effects_file = fit_gaudi.effects_file
     }
 
     meta {
@@ -135,6 +139,7 @@ task fit_gaudi {
       Float gamma
       File phenotype_file
       String phenotype
+      String output_prefix
     }
 
     command <<<
@@ -146,11 +151,13 @@ task fit_gaudi {
       --gamma ~{gamma} \
       --phenotype_file ~{phenotype_file} \
       --phenotype ~{phenotype} \
-      --model_file ~{fbm_pref}_model.rds
+      --output_prefix ~{output_prefix}
     >>>
 
     output {
-        File model_file = "${fbm_pref}_model.rds"
+        File model_file = "${output_prefix}_model.rds"
+        File effects_file = "${output_prefix}_effects.txt"
+        File pgs_file = "${output_prefix}_pgs.txt"
       }
 
   runtime {
