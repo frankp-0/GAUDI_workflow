@@ -1,15 +1,15 @@
 {
-  "run_gaudi.min_ac": 10,
   "run_gaudi.vcf_file": "test_data/2way.target.vcf.gz",
   "run_gaudi.vcf_index_file": "test_data/2way.target.vcf.gz.tbi",
   "run_gaudi.flare_vcf_file": "test_data/2way.flare.vcf.gz",
   "run_gaudi.flare_vcf_index_file": "test_data/2way.flare.vcf.gz.tbi",
-  "run_gaudi.fbm_pref": "test",
+  "run_gaudi.min_ac": 10,
+  "run_gaudi.fbm_prefix": "test",
   "run_gaudi.geno_format": "GT",
+  "run_gaudi.anc_names": ["pop1", "pop2"],
+  "run_gaudi.chunk_size": 100,
   "run_gaudi.gamma": 1,
   "run_gaudi.phenotype_file": "test_data/phenotype_file.txt",
   "run_gaudi.phenotype": "test_phenotype",
-  "run_gaudi.anc_names": ["pop1", "pop2"],
-  "run_gaudi.chunk_size": 100,
   "run_gaudi.output_prefix": "gauditest"
 }

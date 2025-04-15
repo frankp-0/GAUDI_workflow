@@ -1,0 +1,11 @@
+{
+  "prepare_input.vcf_file": "test_data/2way.target.vcf.gz",
+  "prepare_input.vcf_index_file": "test_data/2way.target.vcf.gz.tbi",
+  "prepare_input.flare_vcf_file": "test_data/2way.flare.vcf.gz",
+  "prepare_input.flare_vcf_index_file": "test_data/2way.flare.vcf.gz.tbi",
+  "prepare_input.min_ac": 10,
+  "prepare_input.fbm_prefix": "test",
+  "prepare_input.geno_format": "GT",
+  "prepare_input.anc_names": ["pop1", "pop2"],
+  "prepare_input.chunk_size": 100
+}

@@ -1,0 +1,10 @@
+{
+  "pgs.bk_file": "test_data/test.bk",
+  "pgs.dims_file": "test_data/test_dims.txt",
+  "pgs.info_file": "test_data/test_info.txt",
+  "pgs.fbm_samples_file": "test_data/test_samples.txt",
+  "pgs.gamma": 1,
+  "pgs.phenotype_file": "test_data/phenotype_file.txt",
+  "pgs.phenotype": "test_phenotype",
+  "pgs.output_prefix": "gauditest"
+}
