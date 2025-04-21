@@ -15,10 +15,13 @@ workflow run_gaudi {
         String geno_format
         Array[String] anc_names
         Int chunk_size
+        Int subset_target_mem_gb = 8
+        Int make_fbm_mem_gb = 16
         Int gamma
         File phenotype_file
         String phenotype
         String output_prefix
+        Int fit_gaudi_mem_gb = 20
     }
 
     call prep.subset_target {
@@ -28,7 +31,8 @@ workflow run_gaudi {
           flare_vcf=flare_vcf_file,
           flare_vcf_index=flare_vcf_index_file,
           snp_list=snp_list,
-          fbm_pref=fbm_prefix
+          fbm_pref=fbm_prefix,
+          mem_gb=subset_target_mem_gb
     }
 
     call prep.make_fbm {
@@ -39,7 +43,8 @@ workflow run_gaudi {
             geno_format=geno_format,
             anc_names=anc_names,
             chunk_size=chunk_size,
-            min_ac=min_ac
+            min_ac=min_ac,
+            mem_gb=make_fbm_mem_gb
     }
  
     call pgs.fit_gaudi {
@@ -51,7 +56,8 @@ workflow run_gaudi {
             gamma=gamma,
             phenotype_file=phenotype_file,
             phenotype=phenotype,
-            output_prefix=output_prefix
+            output_prefix=output_prefix,
+            mem_gb=fit_gaudi_mem_gb
     }
 
     output {

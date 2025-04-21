@@ -10,6 +10,7 @@ workflow pgs {
         File phenotype_file
         String phenotype
         String output_prefix
+        Int fit_gaudi_mem_gb = 20
     }
 
     call fit_gaudi {
@@ -21,7 +22,8 @@ workflow pgs {
             gamma=gamma,
             phenotype_file=phenotype_file,
             phenotype=phenotype,
-            output_prefix=output_prefix
+            output_prefix=output_prefix,
+            mem_gb=fit_gaudi_mem_gb
     }
 
     output {
@@ -46,7 +48,10 @@ task fit_gaudi {
         File phenotype_file
         String phenotype
         String output_prefix
+        Int mem_gb
     }
+
+    Int disk_size = ceil(size(bk_file, "GB") + size(info_file, "GB") + size(dims_file, "GB") + size(fbm_samples_file, "GB") + size(phenotype_file, "GB") + 2)
 
     command <<<
         Rscript /scripts/fit_model.R \
@@ -66,7 +71,10 @@ task fit_gaudi {
         File pgs_file = "${output_prefix}_pgs.txt"
     }
 
+
     runtime {
         docker: "frankpo/run_gaudi:0.0.4"
+        disks: "local-disk ~{disk_size} SSD"
+        memory: "~{mem_gb}G"
     }
 }
