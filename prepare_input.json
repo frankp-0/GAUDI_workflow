@@ -7,5 +7,6 @@
   "prepare_input.fbm_prefix": "test",
   "prepare_input.geno_format": "GT",
   "prepare_input.anc_names": ["pop1", "pop2"],
+  "prepare_input.fbm_subset_pvar": "test_data/snps.pvar",
   "prepare_input.chunk_size": 100
 }

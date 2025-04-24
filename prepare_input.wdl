@@ -6,7 +6,7 @@ workflow prepare_input {
         File vcf_index_file
         File flare_vcf_file
         File flare_vcf_index_file
-        File? snp_list
+        File? fbm_subset_pvar
         String fbm_prefix
         String geno_format
         Array[String] anc_names
@@ -22,7 +22,7 @@ workflow prepare_input {
           target_vcf_index=vcf_index_file,
           flare_vcf=flare_vcf_file,
           flare_vcf_index=flare_vcf_index_file,
-          snp_list=snp_list,
+          fbm_subset_pvar=fbm_subset_pvar,
           fbm_pref=fbm_prefix,
           mem_gb=subset_target_mem_gb
         }
@@ -58,26 +58,35 @@ task subset_target {
         File target_vcf_index
         File flare_vcf
         File flare_vcf_index
-        File? snp_list
+        File? fbm_subset_pvar
         String fbm_pref
         Int mem_gb
     }
 
-    Int disk_size = ceil(2 * (size(target_vcf, "GB") + size(target_vcf_index, "GB") + size(flare_vcf, "GB") + size(flare_vcf_index, "GB")))
+    Int disk_size = ceil(3 * (size(target_vcf, "GB") + size(target_vcf_index, "GB") + size(flare_vcf, "GB") + size(flare_vcf_index, "GB")))
 
     command <<<
-        bcftools query -f '%ID\n' ~{target_vcf} > temp_target_snps.txt
-        bcftools query -f '%ID\n' ~{flare_vcf} > temp_flare_snps.txt
-        if [[ "~{snp_list}" = "" ]]
+        /bcftools/bcftools query -f '%CHROM\t%POS\t%ID\t%REF\t%ALT\n' ~{target_vcf} > temp_target.pvar
+        /bcftools/bcftools query -f '%CHROM\t%POS\t%ID\t%REF\t%ALT\n' ~{flare_vcf} > temp_flare.pvar
+
+        if [[ "~{fbm_subset_pvar}" = "" ]]
         then
-          awk 'NR==FNR{a[$0]; next} !($0 in a){print $0} END{for (x in a) print x}' temp_target_snps.txt temp_flare_snps.txt > subset_snps.txt
+            Rscript /scripts/make_regions.R \
+                --target_snps temp_target.pvar \
+                --flare_snps temp_flare.pvar
         else
-          awk 'NR==FNR{a[$0]; next} $0 in a' temp_target_snps.txt ~{snp_list} | awk 'NR==FNR{c[$0]; next} !($0 in c){print $0} END{for (x in c) print x}' temp_flare_snps.txt - > subset_snps.txt
+            Rscript /scripts/make_regions.R \
+                --target_snps temp_target.pvar \
+                --flare_snps temp_flare.pvar \
+                --subset_pvar ~{fbm_subset_pvar}
         fi
-        bcftools view --include ID==@subset_snps.txt ~{target_vcf} -Oz -o ~{fbm_pref}.vcf.gz
-        bcftools index -t ~{fbm_pref}.vcf.gz
-        bcftools annotate -c FORMAT -a ~{flare_vcf} ~{fbm_pref}.vcf.gz -Oz -o ~{fbm_pref}.anc.vcf.gz
-        bcftools index -t ~{fbm_pref}.anc.vcf.gz
+
+        /bcftools/bcftools view -R subset_regions.txt ~{target_vcf} -Oz -o ~{fbm_pref}.vcf.gz
+        /bcftools/bcftools index -t ~{fbm_pref}.vcf.gz
+        /bcftools/bcftools view -R subset_regions.txt ~{flare_vcf} -Oz -o ~{fbm_pref}.flare.vcf.gz
+        /bcftools/bcftools index -t ~{fbm_pref}.flare.vcf.gz
+        /bcftools/bcftools annotate -c FORMAT -a ~{fbm_pref}.flare.vcf.gz ~{fbm_pref}.vcf.gz -Oz -o ~{fbm_pref}.anc.vcf.gz
+        /bcftools/bcftools index -t ~{fbm_pref}.anc.vcf.gz
     >>>
 
     output {
@@ -85,7 +94,7 @@ task subset_target {
         File subset_vcf_index = "~{fbm_pref}.anc.vcf.gz.tbi"
     }
     runtime {
-        docker: "biocontainers/bcftools:v1.9-1-deb_cv1"
+        docker: "frankpo/run_gaudi:0.0.4"
         disks: "local-disk ~{disk_size} SSD"
         memory: "~{mem_gb}G"
     }

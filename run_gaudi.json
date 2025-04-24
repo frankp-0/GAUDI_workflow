@@ -7,6 +7,7 @@
   "run_gaudi.fbm_prefix": "test",
   "run_gaudi.geno_format": "GT",
   "run_gaudi.anc_names": ["pop1", "pop2"],
+  "run_gaudi.fbm_subset_pvar": "test_data/snps.pvar",
   "run_gaudi.chunk_size": 100,
   "run_gaudi.gamma": 1,
   "run_gaudi.phenotype_file": "test_data/phenotype_file.txt",

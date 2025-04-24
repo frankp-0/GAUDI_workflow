@@ -10,7 +10,7 @@ workflow run_gaudi {
         File flare_vcf_file
         File flare_vcf_index_file
         Int min_ac
-        File? snp_list
+        File? fbm_subset_pvar
         String fbm_prefix
         String geno_format
         Array[String] anc_names
@@ -30,7 +30,7 @@ workflow run_gaudi {
           target_vcf_index=vcf_index_file,
           flare_vcf=flare_vcf_file,
           flare_vcf_index=flare_vcf_index_file,
-          snp_list=snp_list,
+          fbm_subset_pvar=fbm_subset_pvar,
           fbm_pref=fbm_prefix,
           mem_gb=subset_target_mem_gb
     }

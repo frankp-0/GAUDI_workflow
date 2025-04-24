@@ -4,5 +4,10 @@ RUN R -e 'BiocManager::install("VariantAnnotation");\
     devtools::install_github("https://github.com/frankp-0/HAUDI.git");\
     install.packages("optparse")'
 
+RUN git clone --recurse-submodules https://github.com/samtools/htslib.git \ 
+    && git clone https://github.com/samtools/bcftools.git \
+    && cd bcftools \
+    && make
+
 COPY R/* /scripts/
 COPY test_data /test_data
