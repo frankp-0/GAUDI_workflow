@@ -5,10 +5,10 @@ import "pgs.wdl" as pgs
 
 workflow run_gaudi {
     input {
-        File vcf_file
-        File vcf_index_file
-        File flare_vcf_file
-        File flare_vcf_index_file
+        Array[File] vcf_files
+        Array[File] vcf_index_files
+        Array[File] flare_vcf_files
+        Array[File] flare_vcf_index_files
         Int min_ac
         File? fbm_subset_pvar
         String fbm_prefix
@@ -24,35 +24,28 @@ workflow run_gaudi {
         Int fit_gaudi_mem_gb = 20
     }
 
-    call prep.subset_target {
+    call prep.prepare_input as prepare_input {
         input:
-          target_vcf=vcf_file,
-          target_vcf_index=vcf_index_file,
-          flare_vcf=flare_vcf_file,
-          flare_vcf_index=flare_vcf_index_file,
-          fbm_subset_pvar=fbm_subset_pvar,
-          fbm_pref=fbm_prefix,
-          mem_gb=subset_target_mem_gb
+            vcf_files = vcf_files,
+            vcf_index_files = vcf_index_files,
+            flare_vcf_files = flare_vcf_files,
+            flare_vcf_index_files = flare_vcf_index_files,
+            fbm_subset_pvar = fbm_subset_pvar,
+            subset_target_mem_gb = subset_target_mem_gb,
+            fbm_prefix = fbm_prefix,
+            geno_format = geno_format,
+            anc_names = anc_names,
+            chunk_size = chunk_size,
+            min_ac = min_ac,
+            make_fbm_mem_gb = make_fbm_mem_gb
     }
 
-    call prep.make_fbm {
-        input:
-            vcf_file=subset_target.subset_vcf,
-            vcf_index_file=subset_target.subset_vcf_index,
-            fbm_pref=fbm_prefix,
-            geno_format=geno_format,
-            anc_names=anc_names,
-            chunk_size=chunk_size,
-            min_ac=min_ac,
-            mem_gb=make_fbm_mem_gb
-    }
- 
     call pgs.fit_gaudi {
         input:
-            bk_file=make_fbm.bk_file,
-            info_file=make_fbm.info_file,
-            dims_file=make_fbm.dims_file,
-            fbm_samples_file=make_fbm.samples_file,
+            bk_file=prepare_input.bk_file,
+            info_file=prepare_input.info_file,
+            dims_file=prepare_input.dims_file,
+            fbm_samples_file=prepare_input.fbm_samples_file,
             gamma=gamma,
             phenotype_file=phenotype_file,
             phenotype=phenotype,
@@ -61,10 +54,10 @@ workflow run_gaudi {
     }
 
     output {
-      File bk_file = make_fbm.bk_file
-      File info_file = make_fbm.info_file
-      File dims_file = make_fbm.dims_file
-      File fbm_samples_file = make_fbm.samples_file
+      File bk_file = prepare_input.bk_file
+      File info_file = prepare_input.info_file
+      File dims_file = prepare_input.dims_file
+      File fbm_samples_file = prepare_input.fbm_samples_file
       File model_file = fit_gaudi.model_file
       File pgs_file = fit_gaudi.pgs_file
       File effects_file = fit_gaudi.effects_file

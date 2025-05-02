@@ -2,43 +2,58 @@ version 1.0
 
 workflow prepare_input {
     input {
-        File vcf_file
-        File vcf_index_file
-        File flare_vcf_file
-        File flare_vcf_index_file
+        Array[File] vcf_files
+        Array[File] vcf_index_files
+        Array[File] flare_vcf_files
+        Array[File] flare_vcf_index_files
         File? fbm_subset_pvar
+        Int subset_target_mem_gb = 8
         String fbm_prefix
         String geno_format
         Array[String] anc_names
         Int chunk_size = 1000
         Int min_ac = 10
-        Int subset_target_mem_gb = 8
         Int make_fbm_mem_gb = 16
     }
 
-    call subset_target {
+    scatter (i in range(length(vcf_files))) {
+        call get_regions as get_regions_chrom {
+            input:
+                target_vcf=vcf_files[i],
+                flare_vcf=flare_vcf_files[i],
+                fbm_subset_pvar=fbm_subset_pvar,
+                mem_gb=subset_target_mem_gb
+          }
+
+        call make_anc_vcf as make_anc_vcf_chrom {
+            input:
+                regions=get_regions_chrom.regions,
+                target_vcf=vcf_files[i],
+                target_vcf_index=vcf_index_files[i],
+                flare_vcf=flare_vcf_files[i],
+                flare_vcf_index=flare_vcf_index_files[i]
+          }
+      }
+
+    call concat_vcfs {
         input:
-          target_vcf=vcf_file,
-          target_vcf_index=vcf_index_file,
-          flare_vcf=flare_vcf_file,
-          flare_vcf_index=flare_vcf_index_file,
-          fbm_subset_pvar=fbm_subset_pvar,
-          fbm_pref=fbm_prefix,
-          mem_gb=subset_target_mem_gb
-        }
+            vcfs = make_anc_vcf_chrom.vcf_file,
+            vcf_indices = make_anc_vcf_chrom.vcf_index,
+            fbm_pref = fbm_prefix
+    }
 
     call make_fbm {
         input:
-            vcf_file=subset_target.subset_vcf,
-            vcf_index_file=subset_target.subset_vcf_index,
+            vcf_file=concat_vcfs.vcf,
+            vcf_index_file=concat_vcfs.index,
             fbm_pref=fbm_prefix,
             geno_format=geno_format,
             anc_names=anc_names,
             chunk_size=chunk_size,
             min_ac=min_ac,
             mem_gb=make_fbm_mem_gb
-        }
- 
+    }
+
     output {
         File bk_file = make_fbm.bk_file
         File info_file = make_fbm.info_file
@@ -46,52 +61,40 @@ workflow prepare_input {
         File fbm_samples_file = make_fbm.samples_file
       }
 
-      meta {
-          author: "Frank Ockerman"
-          email: "frankpo@unc.edu"
-      }
+    meta {
+        author: "Frank Ockerman"
+        email: "frankpo@unc.edu"
+    }
 }
 
-task subset_target {
+task get_regions {
     input {
         File target_vcf
-        File target_vcf_index
         File flare_vcf
-        File flare_vcf_index
         File? fbm_subset_pvar
-        String fbm_pref
         Int mem_gb
     }
 
-    Int disk_size = ceil(3 * (size(target_vcf, "GB") + size(target_vcf_index, "GB") + size(flare_vcf, "GB") + size(flare_vcf_index, "GB")))
+    Int disk_size = ceil(4 * (size(target_vcf, "GB") + size(flare_vcf, "GB")))
+    String raw_name = basename(target_vcf)
+    String base_name = select_first([
+        sub(raw_name, "\\.vcf\\.gz$", ""),
+        sub(raw_name, "\\.vcf$", "")
+    ])
 
-    command <<<
+     command <<<
         /bcftools/bcftools query -f '%CHROM\t%POS\t%ID\t%REF\t%ALT\n' ~{target_vcf} > temp_target.pvar
         /bcftools/bcftools query -f '%CHROM\t%POS\t%ID\t%REF\t%ALT\n' ~{flare_vcf} > temp_flare.pvar
 
-        if [[ "~{fbm_subset_pvar}" = "" ]]
-        then
-            Rscript /scripts/make_regions.R \
-                --target_snps temp_target.pvar \
-                --flare_snps temp_flare.pvar
-        else
-            Rscript /scripts/make_regions.R \
-                --target_snps temp_target.pvar \
-                --flare_snps temp_flare.pvar \
-                --subset_pvar ~{fbm_subset_pvar}
-        fi
-
-        /bcftools/bcftools view -R subset_regions.txt ~{target_vcf} -Oz -o ~{fbm_pref}.vcf.gz
-        /bcftools/bcftools index -t ~{fbm_pref}.vcf.gz
-        /bcftools/bcftools view -R subset_regions.txt ~{flare_vcf} -Oz -o ~{fbm_pref}.flare.vcf.gz
-        /bcftools/bcftools index -t ~{fbm_pref}.flare.vcf.gz
-        /bcftools/bcftools annotate -c FORMAT -a ~{fbm_pref}.flare.vcf.gz ~{fbm_pref}.vcf.gz -Oz -o ~{fbm_pref}.anc.vcf.gz
-        /bcftools/bcftools index -t ~{fbm_pref}.anc.vcf.gz
+        Rscript /scripts/make_regions.R \
+            --output ~{base_name}.regions.txt \
+            --target_snps temp_target.pvar \
+            --flare_snps temp_flare.pvar \
+            ~{if defined(fbm_subset_pvar) then "--subset_pvar " + fbm_subset_pvar else ""}
     >>>
 
     output {
-        File subset_vcf = "~{fbm_pref}.anc.vcf.gz"
-        File subset_vcf_index = "~{fbm_pref}.anc.vcf.gz.tbi"
+        File regions = "~{base_name}.regions.txt"
     }
     runtime {
         docker: "frankpo/run_gaudi:0.0.4"
@@ -99,6 +102,71 @@ task subset_target {
         memory: "~{mem_gb}G"
     }
 }
+
+task make_anc_vcf {
+    input {
+        File regions
+        File target_vcf
+        File target_vcf_index
+        File flare_vcf
+        File flare_vcf_index
+    }
+
+    Int disk_size = ceil(4 * (size(target_vcf, "GB") + size(flare_vcf, "GB")))
+    String raw_name = basename(target_vcf)
+    String base_name = select_first([
+        sub(raw_name, "\\.vcf\\.gz$", ""),
+        sub(raw_name, "\\.vcf$", "")
+    ])
+
+
+    command <<<
+        /bcftools/bcftools view -R ~{regions} ~{target_vcf} -Oz -o subset_target.vcf.gz
+        tabix subset_target.vcf.gz
+        /bcftools/bcftools view -R ~{regions} ~{flare_vcf} -Oz -o subset_flare.vcf.gz
+        tabix subset_flare.vcf.gz
+        /bcftools/bcftools annotate -c FORMAT -a subset_flare.vcf.gz subset_target.vcf.gz -Oz -o ~{base_name}.lanc.vcf.gz
+        tabix ~{base_name}.lanc.vcf.gz
+    >>>
+
+    output {
+        File vcf_file = "~{base_name}.lanc.vcf.gz"
+        File vcf_index = "~{base_name}.lanc.vcf.gz.tbi"
+    }
+
+    runtime {
+        docker: "frankpo/run_gaudi:0.0.4"
+        disks: "local-disk ~{disk_size} SSD"
+        memory: "4G"
+    }
+}
+
+task concat_vcfs {
+    input {
+        Array[File] vcfs
+        Array[File] vcf_indices
+        String fbm_pref
+    }
+
+    Int disk_size = ceil(2.5 * size(vcfs))
+
+    command <<<
+        /bcftools/bcftools concat ~{sep=' ' vcfs} -Oz -o ~{fbm_pref}.vcf.gz
+        tabix ~{fbm_pref}.vcf.gz
+    >>>
+
+    output {
+        File vcf = "~{fbm_pref}.vcf.gz"
+        File index = "~{fbm_pref}.vcf.gz.tbi"
+    }
+
+    runtime {
+        docker: "frankpo/run_gaudi:0.0.4"
+        disks: "local-disk ~{disk_size} SSD"
+        memory: "4G"
+    }
+  }
+
 
 task make_fbm {
     input {
