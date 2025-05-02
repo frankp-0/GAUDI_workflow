@@ -22,6 +22,7 @@ workflow run_gaudi {
         String phenotype
         String output_prefix
         Int fit_gaudi_mem_gb = 20
+        File? snps_file
     }
 
     call prep.prepare_input as prepare_input {
@@ -50,7 +51,8 @@ workflow run_gaudi {
             phenotype_file=phenotype_file,
             phenotype=phenotype,
             output_prefix=output_prefix,
-            mem_gb=fit_gaudi_mem_gb
+            mem_gb=fit_gaudi_mem_gb,
+            snps_file=snps_file
     }
 
     output {

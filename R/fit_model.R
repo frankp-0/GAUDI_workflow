@@ -12,6 +12,7 @@ option_list <- list(
   make_option(c("--phenotype"), type = "character"),
   make_option(c("--fbm_samples_file"), type = "character", default = NULL),
   make_option(c("--training_samples_file"), type = "character", default = NULL),
+  make_option(c("--snps_file"), type = "character", default = NULL),
   make_option(c("--output_prefix"), type = "character")
 )
 opt <- parse_args(OptionParser(option_list = option_list))
@@ -45,6 +46,13 @@ if (!is.null(opt$training_samples_file)) {
 }
 ind_train <- which(!is.na(y))
 
+if (!is.null(opt$snps_file)) {
+  dt_snps <- fread(opt$snps_file)
+  snps <- dt_snps$ID
+} else {
+  snps <- NULL
+}
+
 ## Fit model
 mod <- HAUDI::gaudi(
   fbm_obj = fbm_obj,
@@ -52,11 +60,12 @@ mod <- HAUDI::gaudi(
   y = y,
   ind_train = ind_train,
   gamma_vec = opt$gamma,
-  k = 5
+  k = 5,
+  snps = snps
 )
 
 # get PGS
-X <- HAUDI::construct_gaudi(fbm_obj, fbm_info)
+X <- HAUDI::construct_gaudi(fbm_obj, fbm_info, snps = snps)
 pgs <- predict(mod$fit, Xnew = X, lambda = mod$best_lambda)$fit[, 1]
 dt_pgs <- data.table(sample = fbm_samples, score = pgs)
 

@@ -11,6 +11,7 @@ workflow pgs {
         String phenotype
         String output_prefix
         Int fit_gaudi_mem_gb = 20
+        File? snps_file
     }
 
     call fit_gaudi {
@@ -23,7 +24,8 @@ workflow pgs {
             phenotype_file=phenotype_file,
             phenotype=phenotype,
             output_prefix=output_prefix,
-            mem_gb=fit_gaudi_mem_gb
+            mem_gb=fit_gaudi_mem_gb,
+            snps_file=snps_file
     }
 
     output {
@@ -49,6 +51,7 @@ task fit_gaudi {
         String phenotype
         String output_prefix
         Int mem_gb
+        File? snps_file
     }
 
     Int disk_size = ceil(size(bk_file, "GB") + size(info_file, "GB") + size(dims_file, "GB") + size(fbm_samples_file, "GB") + size(phenotype_file, "GB") + 2)
@@ -62,7 +65,8 @@ task fit_gaudi {
           --gamma ~{gamma} \
           --phenotype_file ~{phenotype_file} \
           --phenotype ~{phenotype} \
-          --output_prefix ~{output_prefix}
+          --output_prefix ~{output_prefix} \
+          ~{if defined(snps_file) then "--snps_file " + snps_file else ""}
     >>>
 
     output {
