@@ -5,7 +5,6 @@ workflow prepare_input {
         Array[File] vcf_files
         Array[File] vcf_index_files
         Array[File] flare_vcf_files
-        Array[File] flare_vcf_index_files
         File? fbm_subset_pvar
         Int subset_target_mem_gb = 8
         String fbm_prefix
@@ -30,8 +29,7 @@ workflow prepare_input {
                 regions=get_regions_chrom.regions,
                 target_vcf=vcf_files[i],
                 target_vcf_index=vcf_index_files[i],
-                flare_vcf=flare_vcf_files[i],
-                flare_vcf_index=flare_vcf_index_files[i]
+                flare_vcf=flare_vcf_files[i]
           }
       }
 
@@ -109,7 +107,6 @@ task make_anc_vcf {
         File target_vcf
         File target_vcf_index
         File flare_vcf
-        File flare_vcf_index
     }
 
     Int disk_size = ceil(4 * (size(target_vcf, "GB") + size(flare_vcf, "GB")))
@@ -123,6 +120,7 @@ task make_anc_vcf {
     command <<<
         /bcftools/bcftools view -R ~{regions} ~{target_vcf} -Oz -o subset_target.vcf.gz
         tabix subset_target.vcf.gz
+        tabix ~{flare_vcf}
         /bcftools/bcftools view -R ~{regions} ~{flare_vcf} -Oz -o subset_flare.vcf.gz
         tabix subset_flare.vcf.gz
         /bcftools/bcftools annotate -c FORMAT -a subset_flare.vcf.gz subset_target.vcf.gz -Oz -o ~{base_name}.lanc.vcf.gz
