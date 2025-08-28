@@ -77,7 +77,7 @@ task fit_gaudi {
 
 
     runtime {
-        docker: "frankpo/run_gaudi:0.0.4"
+        docker: "frankpo/run_gaudi:0.0.5"
         disks: "local-disk ~{disk_size} SSD"
         memory: "~{mem_gb}G"
     }
