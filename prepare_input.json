@@ -1,10 +1,23 @@
 {
-  "prepare_input.vcf_files": ["test_data/chr1.target.vcf.gz", "test_data/chr22.target.vcf.gz"],
-  "prepare_input.vcf_index_files": ["test_data/chr1.target.vcf.gz.tbi", "test_data/chr22.target.vcf.gz.tbi"],
-  "prepare_input.flare_vcf_files": ["test_data/chr1.flare.vcf.gz", "test_data/chr22.flare.vcf.gz"],
+  "prepare_input.vcf_files": [
+    "test_data/chr1.target.vcf.gz",
+    "test_data/chr22.target.vcf.gz"
+  ],
+  "prepare_input.vcf_index_files": [
+    "test_data/chr1.target.vcf.gz.tbi",
+    "test_data/chr22.target.vcf.gz.tbi"
+  ],
+  "prepare_input.flare_vcf_files": [
+    "test_data/chr1.flare.vcf.gz",
+    "test_data/chr22.flare.vcf.gz"
+  ],
+  "prepare_input.samples": "test_data/samples.txt",
   "prepare_input.fbm_subset_pvar": "test_data/snps.pvar",
   "prepare_input.fbm_prefix": "test",
   "prepare_input.geno_format": "GT",
-  "prepare_input.anc_names": ["pop1", "pop2"],
+  "prepare_input.anc_names": [
+    "pop1",
+    "pop2"
+  ],
   "prepare_input.chunk_size": 100
 }

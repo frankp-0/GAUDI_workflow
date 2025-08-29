@@ -8,6 +8,7 @@ workflow run_gaudi {
         Array[File] vcf_files
         Array[File] vcf_index_files
         Array[File] flare_vcf_files
+        File? samples
         Int min_ac
         File? fbm_subset_pvar
         String fbm_prefix
@@ -29,6 +30,7 @@ workflow run_gaudi {
             vcf_files = vcf_files,
             vcf_index_files = vcf_index_files,
             flare_vcf_files = flare_vcf_files,
+            samples = samples,
             fbm_subset_pvar = fbm_subset_pvar,
             subset_target_mem_gb = subset_target_mem_gb,
             fbm_prefix = fbm_prefix,

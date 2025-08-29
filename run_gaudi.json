@@ -1,11 +1,24 @@
 {
-  "run_gaudi.vcf_files": ["test_data/chr1.target.vcf.gz", "test_data/chr22.target.vcf.gz"],
-  "run_gaudi.vcf_index_files": ["test_data/chr1.target.vcf.gz.tbi", "test_data/chr22.target.vcf.gz.tbi"],
-  "run_gaudi.flare_vcf_files": ["test_data/chr1.flare.vcf.gz", "test_data/chr22.flare.vcf.gz"],
+  "run_gaudi.vcf_files": [
+    "test_data/chr1.target.vcf.gz",
+    "test_data/chr22.target.vcf.gz"
+  ],
+  "run_gaudi.vcf_index_files": [
+    "test_data/chr1.target.vcf.gz.tbi",
+    "test_data/chr22.target.vcf.gz.tbi"
+  ],
+  "run_gaudi.flare_vcf_files": [
+    "test_data/chr1.flare.vcf.gz",
+    "test_data/chr22.flare.vcf.gz"
+  ],
+  "run_gaudi.samples": "test_data/samples.txt",
   "run_gaudi.min_ac": 10,
   "run_gaudi.fbm_prefix": "test",
   "run_gaudi.geno_format": "GT",
-  "run_gaudi.anc_names": ["pop1", "pop2"],
+  "run_gaudi.anc_names": [
+    "pop1",
+    "pop2"
+  ],
   "run_gaudi.fbm_subset_pvar": "test_data/snps.pvar",
   "run_gaudi.chunk_size": 100,
   "run_gaudi.gamma": 1,
