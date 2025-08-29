@@ -83,18 +83,20 @@ task get_regions {
     ])
 
      command <<<
-        /bcftools/bcftools query -f '%CHROM\t%POS\t%ID\t%REF\t%ALT\n' ~{target_vcf} > temp_target.pvar
-        /bcftools/bcftools query -f '%CHROM\t%POS\t%ID\t%REF\t%ALT\n' ~{flare_vcf} > temp_flare.pvar
+        /bcftools/bcftools query -f '%CHROM\t%POS\t%ID\t%REF\t%ALT\n' ~{target_vcf} > target.pvar
+        /bcftools/bcftools query -f '%CHROM\t%POS\t%ID\t%REF\t%ALT\n' ~{flare_vcf} > flare.pvar
 
         Rscript /scripts/make_regions.R \
             --output ~{base_name}.regions.txt \
-            --target_snps temp_target.pvar \
-            --flare_snps temp_flare.pvar \
+            --target_snps target.pvar \
+            --flare_snps flare.pvar \
             ~{if defined(fbm_subset_pvar) then "--subset_pvar " + fbm_subset_pvar else ""}
     >>>
 
     output {
         File regions = "~{base_name}.regions.txt"
+        File target_pvar = "target.pvar"
+        File flare_pvar = "flare.pvar"
     }
     runtime {
         docker: "frankpo/run_gaudi:0.0.5"
