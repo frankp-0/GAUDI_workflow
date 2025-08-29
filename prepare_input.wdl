@@ -97,7 +97,7 @@ task get_regions {
         File regions = "~{base_name}.regions.txt"
     }
     runtime {
-        docker: "frankpo/run_gaudi:0.0.5"
+        docker: "frankpo/run_gaudi:0.0.7"
         disks: "local-disk ~{disk_size} SSD"
         memory: "~{mem_gb}G"
     }
@@ -140,7 +140,7 @@ task make_anc_vcf {
     }
 
     runtime {
-        docker: "frankpo/run_gaudi:0.0.5"
+        docker: "frankpo/run_gaudi:0.0.7"
         disks: "local-disk ~{disk_size} SSD"
         memory: "4G"
     }
@@ -166,7 +166,7 @@ task concat_vcfs {
     }
 
     runtime {
-        docker: "frankpo/run_gaudi:0.0.5"
+        docker: "frankpo/run_gaudi:0.0.7"
         disks: "local-disk ~{disk_size} SSD"
         memory: "4G"
     }
@@ -205,7 +205,7 @@ task make_fbm {
     }
 
     runtime {
-        docker: "frankpo/run_gaudi:0.0.5"
+        docker: "frankpo/run_gaudi:0.0.7"
         disks: "local-disk ~{disk_size} SSD"
         memory: "~{mem_gb}G"
     }

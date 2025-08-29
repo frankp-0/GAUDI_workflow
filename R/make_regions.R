@@ -12,13 +12,13 @@ snps_target <- fread(opt$target_snps)
 colnames(snps_flare) <- c("#CHROM", "POS", "ID", "REF", "ALT")
 colnames(snps_target) <- c("#CHROM", "POS", "ID", "REF", "ALT")
 
-snps_flare[, `#CHROM` := gsub("chr", "", `#CHROM`)]
-snps_target[, `#CHROM` := gsub("chr", "", `#CHROM`)]
+chr_flare <- gsub("chr", "", snps_flare$`#CHROM`)
+chr_target <- gsub("chr", "", snps_target$`#CHROM`)
 
 if (!is.null(opt$subset_pvar)) {
   snps_subset <- fread(opt$subset_pvar)
-  snps_subset[, `#CHROM` := gsub("chr", "", `#CHROM`)]
-  snps_target <- snps_target[paste(`#CHROM`, POS) %in% paste(snps_subset$`#CHROM`, snps_subset$POS), ]
+  chr_subset <- gsub("chr", "", snps_subset$`#CHROM`)
+  snps_target <- snps_target[paste(chr_target, POS) %in% paste(chr_subset, snps_subset$POS), ]
 }
 
 
